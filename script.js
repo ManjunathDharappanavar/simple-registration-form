@@ -133,7 +133,25 @@ document.addEventListener('DOMContentLoaded', () => {
             submitBtn.classList.add('loading');
             submitBtn.disabled = true;
 
-            setTimeout(() => {
+            const payload = {
+                username: usernameInput.value.trim(),
+                email: emailInput.value.trim(),
+                password: passwordInput.value
+            };
+
+            fetch('http://localhost:5000/api/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(async response => {
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.message || 'Registration failed');
+                }
+                
                 submitBtn.classList.remove('loading');
                 submitBtn.style.background = 'var(--success)';
                 submitBtn.style.boxShadow = '0 4px 14px 0 rgba(34, 197, 94, 0.39)';
@@ -150,8 +168,22 @@ document.addEventListener('DOMContentLoaded', () => {
                     submitBtn.querySelector('span').innerText = 'Sign Up';
                     submitBtn.disabled = false;
                 }, 3000);
+            })
+            .catch(error => {
+                submitBtn.classList.remove('loading');
+                submitBtn.disabled = false;
                 
-            }, 1500);
+                // Show generic error or backend error
+                submitBtn.style.background = 'var(--error)';
+                submitBtn.style.boxShadow = '0 4px 14px 0 rgba(239, 68, 68, 0.39)';
+                submitBtn.querySelector('span').innerText = error.message;
+
+                setTimeout(() => {
+                    submitBtn.style.background = '';
+                    submitBtn.style.boxShadow = '';
+                    submitBtn.querySelector('span').innerText = 'Sign Up';
+                }, 3000);
+            });
         } else {
             // Error shake animation
             form.classList.add('shake');
